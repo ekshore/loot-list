@@ -1,0 +1,1 @@
+DROP TABLE "lootlist_list_items";
