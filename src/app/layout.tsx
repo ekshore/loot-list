@@ -8,28 +8,33 @@ import { ThemeProvider } from "~/components/theme-provider";
 import { Header } from "~/app/_components/header";
 
 export const metadata: Metadata = {
-    title: "Loot List",
-    description: "A place to keep lists of desired loot",
-    icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: "Loot List",
+  description: "A place to keep lists of desired loot",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{ children: React.ReactNode }>) {
-    return (
-        <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
-            <body>
-                <TRPCReactProvider>
-                    <ThemeProvider attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        <Header/>
-                        {children}
-                    </ThemeProvider>
-                </TRPCReactProvider>
-            </body>
-        </html>
-    );
+  return (
+    <html
+      lang="en"
+      className={`${GeistSans.variable}`}
+      suppressHydrationWarning
+    >
+      <body>
+        <TRPCReactProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+            {children}
+          </ThemeProvider>
+        </TRPCReactProvider>
+      </body>
+    </html>
+  );
 }

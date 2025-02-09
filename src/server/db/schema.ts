@@ -145,5 +145,5 @@ export const listItems = createTable("list_items", {
 });
 
 export const listItemRelations = relations(listItems, ({ one }) => ({
-    list: one(lists, { fields: [listItems.listId], references: [lists.id] }),
+  list: one(lists, { fields: [listItems.listId], references: [lists.id] }),
 }));
