@@ -10,7 +10,7 @@ import { Header } from "~/app/_components/header";
 export const metadata: Metadata = {
   title: "Loot List",
   description: "A place to keep lists of desired loot",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/images/favicon.ico" }],
 };
 
 export default function RootLayout({
