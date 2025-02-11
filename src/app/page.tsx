@@ -16,12 +16,12 @@ import { desc } from "drizzle-orm";
 
 export default async function Home() {
   return (
-    <main className="container m-auto min-h-screen border-x border-x-border">
+    <>
       <div className="flex flex-col items-center">
         <h1 className="py-5 text-5xl font-bold">Ekstrand Family Lists</h1>
         <ListDisplay />
       </div>
-    </main>
+    </>
   );
 }
 
@@ -33,7 +33,7 @@ const ListDisplay = async () => {
     .orderBy(desc(lists.updatedAt));
 
   const listCards = wishLists.map((list) => {
-    const listUrl = `/mylists/${list.id}`;
+    const listUrl = `/lists/${list.id}`;
     return (
       <Link key={list.id} href={listUrl} className="m-5">
         <Card className="flex h-60 w-72 flex-col">

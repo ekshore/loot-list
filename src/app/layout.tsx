@@ -31,7 +31,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Header />
-            {children}
+            <main className="container m-auto min-h-screen border-x border-x-border">
+                {children}
+            </main>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

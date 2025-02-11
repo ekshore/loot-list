@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { relations, sql, type InferSelectModel } from "drizzle-orm";
 import {
   index,
   integer,
@@ -130,6 +130,9 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
   account: one(users, { fields: [lists.userId], references: [users.id] }),
   listItems: many(listItems),
 }));
+
+export type List = InferSelectModel<typeof lists>;
+
 
 export const listItems = createTable("list_items", {
   id: varchar("id", { length: 255 })
