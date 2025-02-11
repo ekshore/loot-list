@@ -11,8 +11,8 @@ import {
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { lists } from "~/server/db/schema";
-import { desc } from "drizzle-orm";
+import { lists, users } from "~/server/db/schema";
+import { eq, desc } from "drizzle-orm";
 
 export default async function Home() {
   return (
@@ -28,25 +28,31 @@ export default async function Home() {
 const ListDisplay = async () => {
   "server";
   const wishLists = await db
-    .select()
+    .select({
+      id: lists.id,
+      name: lists.name,
+      author: users.name,
+      summary: lists.summary,
+      lastUpdate: lists.updatedAt,
+    })
     .from(lists)
+    .innerJoin(users, eq(users.id, lists.userId))
     .orderBy(desc(lists.updatedAt));
 
-  const listCards = wishLists.map((list) => {
-    const listUrl = `/lists/${list.id}`;
+  const listCards = wishLists.map((item) => {
+    const listUrl = `/lists/${item.id}`;
     return (
-      <Link key={list.id} href={listUrl} className="m-5">
+      <Link key={item.id} href={listUrl} className="m-5">
         <Card className="flex h-60 w-72 flex-col">
           <CardHeader className="basis-1/4">
-            <CardTitle>{list.name}</CardTitle>
+            <CardTitle>{item.name}</CardTitle>
+            <CardDescription>Created by: {item.author}</CardDescription>
           </CardHeader>
-          <CardContent className="basis-2/4">
-            <CardDescription>{list.summary}</CardDescription>
-          </CardContent>
+          <CardContent className="basis-2/4">{item.summary}</CardContent>
           <CardFooter className="basis-1/4">
             Last updated:&nbsp;
             <span className="text-xs text-muted-foreground">
-              {list.createdAt.toLocaleDateString()}
+              {item.lastUpdate?.toLocaleDateString()}
             </span>
           </CardFooter>
         </Card>
