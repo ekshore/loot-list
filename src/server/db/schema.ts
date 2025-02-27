@@ -117,7 +117,7 @@ export const lists = createTable("lists", {
     .notNull()
     .references(() => users.id),
   name: varchar("name", { length: 255 }).notNull(),
-  summary: varchar("summary", { length: 255 }),
+  summary: varchar("summary", { length: 255 }).notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

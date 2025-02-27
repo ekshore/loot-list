@@ -12,7 +12,7 @@ const Header = async () => {
         <div className="flex">
           <Link href="/">Loot List</Link>
           <nav className="flex items-center gap-4 px-4 text-sm">
-            <Link href="lists/mylists">My Lists</Link>
+            <Link href="/lists/mylists">My Lists</Link>
             <Link href="/shared-lists">Shared Lists</Link>
           </nav>
         </div>

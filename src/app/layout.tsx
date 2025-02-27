@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { ThemeProvider } from "~/components/theme-provider";
+import { SessionProvider } from "next-auth/react";
 import { Header } from "~/app/_components/header";
 
 export const metadata: Metadata = {
@@ -30,10 +31,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Header />
-            <main className="container m-auto min-h-screen border-x border-x-border">
+            <SessionProvider>
+              <Header />
+              <main className="container m-auto min-h-screen border-x border-x-border">
                 {children}
-            </main>
+              </main>
+            </SessionProvider>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>
