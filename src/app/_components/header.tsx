@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 const Header = async () => {
   return (
     <header className="sticky top-0 border-b border-b-border">
-      <div className="container mx-auto flex h-14 items-center border-x border-x-border px-4">
+      <div className="container mx-auto flex h-14 items-center border-x border-x-border bg-background px-4">
         <div className="flex">
           <Link href="/">Loot List</Link>
           <nav className="flex items-center gap-4 px-4 text-sm">
