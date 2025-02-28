@@ -4,7 +4,7 @@ import React from "react";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { lists, List } from "~/server/db/schema";
-import { eq, ne } from "drizzle-orm";
+import { desc, eq, ne } from "drizzle-orm";
 
 export default async function ListsLayout({
   children,
@@ -49,11 +49,13 @@ const fetchLists = async () => {
     const usersLists = await db
       .select()
       .from(lists)
-      .where(eq(lists.userId, session.user.id));
+      .where(eq(lists.userId, session.user.id))
+      .orderBy(desc(lists.updatedAt));
     const sharedLists = await db
       .select()
       .from(lists)
-      .where(ne(lists.userId, session.user.id));
+      .where(ne(lists.userId, session.user.id))
+      .orderBy(desc(lists.updatedAt));
     return { myLists: usersLists, sharedLists: sharedLists };
   } else {
     const allLists = await db.select().from(lists);
