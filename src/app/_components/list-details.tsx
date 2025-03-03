@@ -70,11 +70,7 @@ const EditListDetails = ({
       <PopoverContent>
         <div className="flex flex-col">
           Edit List Details.
-          <ListDetailsEditForm
-            listId={listId}
-            name={name}
-            desc={desc}
-          />
+          <ListDetailsEditForm listId={listId} name={name} desc={desc} />
         </div>
       </PopoverContent>
     </Popover>

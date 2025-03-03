@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { auth } from "~/server/auth";
+import { fetchListItems } from "~/server/actions";
 
 const MY_LISTS: string = "mylists" as const;
 const ListPage = async ({
@@ -35,11 +36,7 @@ const ListPage = async ({
 };
 
 const ListView = async ({ listId }: { listId: string }) => {
-  const lisItems = await db
-    .select()
-    .from(listItems)
-    .where(eq(listItems.listId, listId));
-
+  const listItems = await fetchListItems(listId);
   const items = [
     {
       listId: "1",
@@ -61,16 +58,18 @@ const ListView = async ({ listId }: { listId: string }) => {
     },
   ];
 
+  if (!listItems || listItems.length < 1) {
+    return <h3 className="my-10 h-3">There are no items in this list</h3>;
+  }
+
   if (!items || items.length < 1) {
     return <h3 className="h-3">There are no items in this list</h3>;
   }
 
-  const accordionItems = items.map((item) => {
+  const accordionItems = listItems.map((item) => {
     return (
       <AccordionItem value={item.id} key={item.id}>
-        <AccordionTrigger>
-          {item.name}
-        </AccordionTrigger>
+        <AccordionTrigger>{item.name}</AccordionTrigger>
         <AccordionContent>{item.description}</AccordionContent>
       </AccordionItem>
     );

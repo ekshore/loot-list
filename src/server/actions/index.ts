@@ -29,11 +29,6 @@ const updateListDetailsAction = async (
   console.log(
     `Updating list id: ${listId} with the following info: { name: ${values.name}, desc: ${values.description} }`,
   );
-  //return await db
-  //  .update(lists)
-  //  .set({ name: values.name, summary: values.description })
-  //  .where(eq(lists.id, listId))
-  //  .returning({ name: lists.name, description: lists.summary });
   await db
     .update(lists)
     .set({ name: values.name, summary: values.description })
@@ -45,4 +40,8 @@ const deleteListAction = async (listId: string) => {
   await db.delete(listItems).where(eq(listItems.listId, listId));
 };
 
-export { fetchListDetailsAction, updateListDetailsAction, deleteListAction };
+const fetchListItems = async (listId: string) => {
+  return await db.select().from(listItems).where(eq(listItems.listId, listId));
+};
+
+export { fetchListDetailsAction, updateListDetailsAction, deleteListAction, fetchListItems };
