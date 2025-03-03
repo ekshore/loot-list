@@ -27,7 +27,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { newItemSchema } from "~/server/validators";
 import { saveListItemAction } from "~/server/actions";
 
-const NewItemForm = ({ listId }: { listId: string }) => {
+const ListItemForm = ({ listId }: { listId: string }) => {
   const form = useForm<z.infer<typeof newItemSchema>>({
     resolver: zodResolver(newItemSchema),
     defaultValues: {
@@ -104,4 +104,4 @@ const NewItemForm = ({ listId }: { listId: string }) => {
   );
 };
 
-export { NewItemForm };
+export { ListItemForm };
