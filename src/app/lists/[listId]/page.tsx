@@ -1,6 +1,3 @@
-import { eq } from "drizzle-orm";
-import { db } from "~/server/db";
-import { listItems } from "~/server/db/schema";
 import { ListDetails } from "~/app/_components/list-details";
 import {
   Accordion,
@@ -8,8 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-import { auth } from "~/server/auth";
-import { fetchListItems } from "~/server/actions";
+import { fetchListItemsAction } from "~/server/actions";
 
 const MY_LISTS: string = "mylists" as const;
 const ListPage = async ({
@@ -36,7 +32,7 @@ const ListPage = async ({
 };
 
 const ListView = async ({ listId }: { listId: string }) => {
-  const listItems = await fetchListItems(listId);
+  const listItems = await fetchListItemsAction(listId);
   const items = [
     {
       listId: "1",

@@ -1,9 +1,16 @@
 "use server";
-import { listDetailsSchema } from "~/server/validators";
+import { auth } from "../auth";
+import { listDetailsSchema, newItemSchema } from "~/server/validators";
 import { lists, listItems, users } from "~/server/db/schema";
 import { db } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+
+type ServerActionResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: ServerActionError };
+
+type ServerActionError = { code: number; message: string };
 
 const fetchListDetailsAction = async (listId: string) => {
   const listDetails = (
@@ -40,8 +47,44 @@ const deleteListAction = async (listId: string) => {
   await db.delete(listItems).where(eq(listItems.listId, listId));
 };
 
-const fetchListItems = async (listId: string) => {
+const fetchListItemsAction = async (listId: string) => {
   return await db.select().from(listItems).where(eq(listItems.listId, listId));
 };
 
-export { fetchListDetailsAction, updateListDetailsAction, deleteListAction, fetchListItems };
+const saveListItemAction = async (
+  listId: string,
+  values: z.infer<typeof newItemSchema>,
+): Promise<ServerActionResult<null>> => {
+  const session = await auth();
+  if (!session || !hasListAccess(listId, session.user.id)) {
+      return Promise.reject({ code: 403, message: "Forbidden"});
+  }
+  await db.insert(listItems).values({
+    listId: listId,
+    name: values.name,
+    description: values.description,
+  });
+  return { success: true, data: null };
+};
+
+export {
+  fetchListDetailsAction,
+  updateListDetailsAction,
+  deleteListAction,
+  fetchListItemsAction,
+  saveListItemAction,
+};
+
+const hasListAccess = async (listId: string, userId: string) => {
+  const list = (
+    await db
+      .select({ id: lists.id, userId: lists.userId })
+      .from(lists)
+      .where(eq(lists.id, userId))
+  ).pop();
+  if (list && list.userId === userId) {
+    return true;
+  } else {
+    return false;
+  }
+};

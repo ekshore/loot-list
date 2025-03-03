@@ -8,6 +8,7 @@ import {
 import { auth } from "~/server/auth";
 import { fetchListDetailsAction } from "~/server/actions";
 import { ListDetailsEditForm } from "./list-details-form";
+import { NewItemForm } from "./new-item-form";
 
 const ListDetails = async ({ listId }: { listId: string }) => {
   const listDetails = await fetchListDetailsAction(listId);
@@ -43,6 +44,9 @@ const ListDetails = async ({ listId }: { listId: string }) => {
           <Button variant="destructive">
             Delete <Trash2 />
           </Button>
+          <div className="flex flex-1 justify-end">
+            <NewItemForm listId={listId} />
+          </div>
         </div>
       ) : (
         <></>

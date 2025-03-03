@@ -5,4 +5,9 @@ const listDetailsSchema = z.object({
   description: z.string().max(255),
 });
 
-export { listDetailsSchema };
+const newItemSchema = z.object({
+  name: z.string().min(5).max(50),
+  description: z.string().max(255),
+});
+
+export { listDetailsSchema, newItemSchema };
