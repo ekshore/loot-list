@@ -3,7 +3,7 @@ import { auth } from "../auth";
 import { listDetailsSchema, newItemSchema } from "~/server/validators";
 import { lists, listItems, users } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 type ServerActionResult<T> =
@@ -65,16 +65,26 @@ const saveListItemAction = async (
   values: z.infer<typeof newItemSchema>,
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
-  //console.log(`saving list item for list id: ${listId} user Id: ${session?.user.id}`);
-  if (!session || ! await hasListAccess(listId, session.user.id)) {
+  if (!session || !(await hasListAccess(listId, session.user.id))) {
     return Promise.reject(FORBIDDEN_ERROR);
   }
-  await db.insert(listItems).values({
-    listId: listId,
-    name: values.name,
-    description: values.description,
-  });
-  return NULL_SUCCESS;
+
+  return await db
+    .transaction(async (tx) => {
+      await tx.insert(listItems).values({
+        listId: listId,
+        name: values.name,
+        description: values.description,
+      });
+      await tx
+        .update(lists)
+        .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+        .where(eq(lists.id, listId));
+    })
+    .then(() => NULL_SUCCESS)
+    .catch((err) => {
+      return { success: false, error: { code: 500, message: err } };
+    });
 };
 
 const updateListItemAction = async (
@@ -82,29 +92,69 @@ const updateListItemAction = async (
   values: z.infer<typeof newItemSchema>,
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
-  if (!session || ! await hasListItemAccess(itemId, session.user.id)) {
+  const parentList = (
+    await db
+      .select({ id: listItems.id })
+      .from(listItems)
+      .where(eq(listItems.id, itemId))
+  ).pop();
+
+  if (
+    !session ||
+    !parentList ||
+    !(await hasListAccess(parentList.id, session.user.id))
+  ) {
     return Promise.reject(FORBIDDEN_ERROR);
   }
-  console.log("Authorized and updating");
-  console.log(values);
-  console.log(itemId);
 
-  await db
-    .update(listItems)
-    .set({ name: values.name, description: values.description })
-    .where(eq(listItems.id, itemId));
-  return NULL_SUCCESS;
+  return await db
+    .transaction(async (tx) => {
+      await tx
+        .update(listItems)
+        .set({ name: values.name, description: values.description })
+        .where(eq(listItems.id, itemId));
+      await tx
+        .update(lists)
+        .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+        .where(eq(lists.id, parentList.id));
+    })
+    .then(() => NULL_SUCCESS)
+    .catch((err) => {
+      return { success: false, error: { code: 500, message: err } };
+    });
 };
 
 const deleteListItemAction = async (
   itemId: string,
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
-  if (!session || !hasListItemAccess(itemId, session.user.id)) {
+  const parentList = (
+    await db
+      .select({ id: listItems.id })
+      .from(listItems)
+      .where(eq(listItems.id, itemId))
+  ).pop();
+
+  if (
+    !session ||
+    !parentList ||
+    !hasListAccess(parentList.id, session.user.id)
+  ) {
     return Promise.reject(FORBIDDEN_ERROR);
   }
 
-  await db.delete(listItems).where(eq(listItems.id, itemId));
+  db.transaction(async (tx) => {
+    await tx.delete(listItems).where(eq(listItems.id, itemId));
+    await tx
+      .update(lists)
+      .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+      .where(eq(lists.id, parentList.id));
+  })
+    .then(() => NULL_SUCCESS)
+    .catch((err) => {
+      return { success: false, error: { code: 500, message: err } };
+    });
+
   return NULL_SUCCESS;
 };
 
@@ -125,22 +175,9 @@ const hasListAccess = async (listId: string, userId: string) => {
       .from(lists)
       .where(eq(lists.userId, userId))
   ).pop();
-  console.log(`Checking access for list: ${listId}, userId for list is: ${list?.userId}`);
-  if (list && list.userId === userId) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
-const hasListItemAccess = async (itemId: string, userId: string) => {
-  const list = (
-    await db
-      .select({ id: lists.id, userId: lists.userId })
-      .from(listItems)
-      .leftJoin(lists, eq(lists.id, listItems.listId))
-      .where(eq(listItems.id, itemId))
-  ).pop();
+  console.log(
+    `Checking access for list: ${listId}, userId for list is: ${list?.userId}`,
+  );
   if (list && list.userId === userId) {
     return true;
   } else {
