@@ -130,7 +130,7 @@ const deleteListItemAction = async (
   const session = await auth();
   const parentList = (
     await db
-      .select({ id: listItems.id })
+      .select({ id: listItems.listId })
       .from(listItems)
       .where(eq(listItems.id, itemId))
   ).pop();

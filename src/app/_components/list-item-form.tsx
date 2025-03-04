@@ -34,11 +34,7 @@ import {
 
 type Item = z.infer<typeof newItemSchema>;
 
-const ItemForm = ({
-  form,
-}: {
-  form: UseFormReturn<Item, any, undefined>;
-}) => {
+const ItemForm = ({ form }: { form: UseFormReturn<Item, any, undefined> }) => {
   return (
     <>
       <FormField
@@ -111,11 +107,9 @@ const NewItemForm = ({ listId }: { listId: string }) => {
                 Enter a new item for the wishlist and click save when done.
               </DialogDescription>
             </DialogHeader>
-            <ItemForm form={form} onSubmit={onSubmit} />
+            <ItemForm form={form} />
             <DialogFooter className="mt-4">
-              <Button type="submit">
-                Save
-              </Button>
+              <Button type="submit">Save</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -147,7 +141,8 @@ const EditItemForm = ({ itemId, item }: { itemId: string; item: Item }) => {
       .catch((error) => console.log(error));
   };
 
-  const deleteItem = async () => {
+  const deleteItem = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     await deleteListItemAction(itemId)
       .then(() => {
         setOpen(false);
@@ -170,10 +165,10 @@ const EditItemForm = ({ itemId, item }: { itemId: string; item: Item }) => {
               <DialogTitle>Edit List Item</DialogTitle>
               <DialogDescription>Update this item</DialogDescription>
             </DialogHeader>
-            <ItemForm form={form} onSubmit={onSubmit} />
+            <ItemForm form={form} />
             <DialogFooter className="mt-4">
               <Button type="submit">Save</Button>
-              <Button variant="destructive" onClick={deleteItem}>
+              <Button type="button" variant="destructive" onClick={deleteItem}>
                 Delete
               </Button>
             </DialogFooter>
