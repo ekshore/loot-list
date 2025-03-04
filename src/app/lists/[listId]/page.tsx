@@ -1,11 +1,14 @@
 import { ListDetails } from "~/app/_components/list-details";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "~/components/ui/accordion";
 import { fetchListItemsAction } from "~/server/actions";
+import { auth } from "~/server/auth";
+import { EditItemForm } from "~/app/_components/list-item-form";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 const MY_LISTS: string = "mylists" as const;
 const ListPage = async ({
@@ -33,51 +36,35 @@ const ListPage = async ({
 
 const ListView = async ({ listId }: { listId: string }) => {
   const listItems = await fetchListItemsAction(listId);
-  const items = [
-    {
-      listId: "1",
-      id: "id-1",
-      name: "Item 1",
-      description: "This is a really cool item",
-    },
-    {
-      listId: "2",
-      id: "id-2",
-      name: "Item 2",
-      description: "This is a really cool item",
-    },
-    {
-      listId: "3",
-      id: "id-3",
-      name: "Item 3",
-      description: "This is a really cool item",
-    },
-  ];
+  const session = await auth();
 
   if (!listItems || listItems.length < 1) {
     return <h3 className="my-10 h-3">There are no items in this list</h3>;
   }
 
-  if (!items || items.length < 1) {
-    return <h3 className="h-3">There are no items in this list</h3>;
-  }
-
-  const accordionItems = listItems.map((item) => {
+  const itemCards = listItems.map((item) => {
+    const formData = {
+      name: item.name,
+      description: item.description ?? "",
+    };
     return (
-      <AccordionItem value={item.id} key={item.id}>
-        <AccordionTrigger>{item.name}</AccordionTrigger>
-        <AccordionContent>{item.description}</AccordionContent>
-      </AccordionItem>
+      <Card key={item.id}>
+        <CardHeader>
+          <CardTitle>{item.name}</CardTitle>
+        </CardHeader>
+        <CardContent className="h-52">{item.description}</CardContent>
+        <CardFooter>
+          {session && session.user ? (
+            <EditItemForm itemId={item.id} item={formData} />
+          ) : (
+            <></>
+          )}
+        </CardFooter>
+      </Card>
     );
   });
 
-  return (
-    <div className="my-10">
-      <Accordion type="single" collapsible className="w-full">
-        {accordionItems}
-      </Accordion>
-    </div>
-  );
+  return <div className="my-16 grid grid-cols-3 gap-6">{itemCards}</div>;
 };
 
 const ListSplashPage = () => {

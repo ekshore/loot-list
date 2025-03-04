@@ -12,6 +12,15 @@ type ServerActionResult<T> =
 
 type ServerActionError = { code: number; message: string };
 
+const FORBIDDEN_ERROR: ServerActionError = {
+  code: 403,
+  message: "FORBIDDEN",
+} as const;
+const NULL_SUCCESS: ServerActionResult<null> = {
+  success: true,
+  data: null,
+} as const;
+
 const fetchListDetailsAction = async (listId: string) => {
   const listDetails = (
     await db
@@ -56,15 +65,47 @@ const saveListItemAction = async (
   values: z.infer<typeof newItemSchema>,
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
-  if (!session || !hasListAccess(listId, session.user.id)) {
-      return Promise.reject({ code: 403, message: "Forbidden"});
+  //console.log(`saving list item for list id: ${listId} user Id: ${session?.user.id}`);
+  if (!session || ! await hasListAccess(listId, session.user.id)) {
+    return Promise.reject(FORBIDDEN_ERROR);
   }
   await db.insert(listItems).values({
     listId: listId,
     name: values.name,
     description: values.description,
   });
-  return { success: true, data: null };
+  return NULL_SUCCESS;
+};
+
+const updateListItemAction = async (
+  itemId: string,
+  values: z.infer<typeof newItemSchema>,
+): Promise<ServerActionResult<null>> => {
+  const session = await auth();
+  if (!session || ! await hasListItemAccess(itemId, session.user.id)) {
+    return Promise.reject(FORBIDDEN_ERROR);
+  }
+  console.log("Authorized and updating");
+  console.log(values);
+  console.log(itemId);
+
+  await db
+    .update(listItems)
+    .set({ name: values.name, description: values.description })
+    .where(eq(listItems.id, itemId));
+  return NULL_SUCCESS;
+};
+
+const deleteListItemAction = async (
+  itemId: string,
+): Promise<ServerActionResult<null>> => {
+  const session = await auth();
+  if (!session || !hasListItemAccess(itemId, session.user.id)) {
+    return Promise.reject(FORBIDDEN_ERROR);
+  }
+
+  await db.delete(listItems).where(eq(listItems.id, itemId));
+  return NULL_SUCCESS;
 };
 
 export {
@@ -73,6 +114,8 @@ export {
   deleteListAction,
   fetchListItemsAction,
   saveListItemAction,
+  updateListItemAction,
+  deleteListItemAction,
 };
 
 const hasListAccess = async (listId: string, userId: string) => {
@@ -80,7 +123,23 @@ const hasListAccess = async (listId: string, userId: string) => {
     await db
       .select({ id: lists.id, userId: lists.userId })
       .from(lists)
-      .where(eq(lists.id, userId))
+      .where(eq(lists.userId, userId))
+  ).pop();
+  console.log(`Checking access for list: ${listId}, userId for list is: ${list?.userId}`);
+  if (list && list.userId === userId) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const hasListItemAccess = async (itemId: string, userId: string) => {
+  const list = (
+    await db
+      .select({ id: lists.id, userId: lists.userId })
+      .from(listItems)
+      .leftJoin(lists, eq(lists.id, listItems.listId))
+      .where(eq(listItems.id, itemId))
   ).pop();
   if (list && list.userId === userId) {
     return true;

@@ -8,14 +8,14 @@ import {
 import { auth } from "~/server/auth";
 import { fetchListDetailsAction } from "~/server/actions";
 import { ListDetailsEditForm } from "./list-details-form";
-import { ListItemForm } from "./list-item-form";
+import { NewItemForm} from "./list-item-form";
 
 const ListDetails = async ({ listId }: { listId: string }) => {
   const listDetails = await fetchListDetailsAction(listId);
 
   if (!listDetails) {
     return (
-      <div className="text-4xl font-bold text-destructive-foreground">
+      <div className="my-4 text-4xl font-bold text-destructive-foreground">
         Error fetching list details
       </div>
     );
@@ -23,7 +23,7 @@ const ListDetails = async ({ listId }: { listId: string }) => {
   const session = await auth();
 
   return (
-    <div className="h-40">
+    <div className="my-4 h-40">
       <p className="my-4 text-4xl font-bold">{listDetails.name}</p>
       <p className="my-2 text-xl">{listDetails.description}</p>
       <p className="font-light italic">List owner: {listDetails.owner}</p>
@@ -45,7 +45,7 @@ const ListDetails = async ({ listId }: { listId: string }) => {
             Delete <Trash2 />
           </Button>
           <div className="flex flex-1 justify-end">
-            <ListItemForm listId={listId} />
+            <NewItemForm listId={listId} />
           </div>
         </div>
       ) : (
