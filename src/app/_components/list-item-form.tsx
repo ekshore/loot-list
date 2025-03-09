@@ -25,14 +25,14 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { newItemSchema } from "~/server/validators";
+import { itemSchema } from "~/server/validators";
 import {
   saveListItemAction,
   updateListItemAction,
   deleteListItemAction,
 } from "~/server/actions";
 
-type Item = z.infer<typeof newItemSchema>;
+type Item = z.infer<typeof itemSchema>;
 
 const ItemForm = ({ form }: { form: UseFormReturn<Item, any, undefined> }) => {
   return (
@@ -68,7 +68,7 @@ const ItemForm = ({ form }: { form: UseFormReturn<Item, any, undefined> }) => {
 
 const NewItemForm = ({ listId }: { listId: string }) => {
   const form = useForm<Item>({
-    resolver: zodResolver(newItemSchema),
+    resolver: zodResolver(itemSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -120,7 +120,7 @@ const NewItemForm = ({ listId }: { listId: string }) => {
 
 const EditItemForm = ({ itemId, item }: { itemId: string; item: Item }) => {
   const form = useForm<Item>({
-    resolver: zodResolver(newItemSchema),
+    resolver: zodResolver(itemSchema),
     defaultValues: {
       name: item.name,
       description: item.description,

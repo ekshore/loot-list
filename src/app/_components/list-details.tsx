@@ -1,14 +1,6 @@
-import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
+import { OwnerActions } from "./list-owner-actions";
 import { auth } from "~/server/auth";
 import { fetchListDetailsAction } from "~/server/actions";
-import { ListDetailsEditForm } from "./list-details-form";
-import { NewItemForm} from "./list-item-form";
 
 const ListDetails = async ({ listId }: { listId: string }) => {
   const listDetails = await fetchListDetailsAction(listId);
@@ -35,49 +27,15 @@ const ListDetails = async ({ listId }: { listId: string }) => {
         <></>
       )}
       {session && session.user.id === listDetails.userId ? (
-        <div className="my-2 flex flex-row gap-4">
-          <EditListDetails
-            listId={listId}
-            name={listDetails.name}
-            desc={listDetails.description}
-          />
-          <Button variant="destructive">
-            Delete <Trash2 />
-          </Button>
-          <div className="flex flex-1 justify-end">
-            <NewItemForm listId={listId} />
-          </div>
-        </div>
+        <OwnerActions
+          listId={listId}
+          name={listDetails.name}
+          desc={listDetails.description}
+        />
       ) : (
         <></>
       )}
     </div>
-  );
-};
-
-const EditListDetails = ({
-  listId,
-  name,
-  desc,
-}: {
-  listId: string;
-  name: string;
-  desc: string;
-}) => {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="secondary">
-          Edit <Pencil />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent>
-        <div className="flex flex-col">
-          Edit List Details.
-          <ListDetailsEditForm listId={listId} name={name} desc={desc} />
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 };
 

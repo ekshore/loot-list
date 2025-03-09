@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "../auth";
-import { listDetailsSchema, newItemSchema } from "~/server/validators";
+import { listDetailsSchema, itemSchema } from "~/server/validators";
 import { lists, listItems, users } from "~/server/db/schema";
 import { db } from "~/server/db";
 import { eq, sql } from "drizzle-orm";
@@ -41,19 +41,39 @@ const fetchListDetailsAction = async (listId: string) => {
 const updateListDetailsAction = async (
   listId: string,
   values: z.infer<typeof listDetailsSchema>,
-) => {
-  console.log(
-    `Updating list id: ${listId} with the following info: { name: ${values.name}, desc: ${values.description} }`,
-  );
-  await db
+): Promise<ServerActionResult<null>> => {
+  const session = await auth();
+  if (!session || !(await hasListAccess(listId, session.user.id))) {
+    return Promise.reject();
+  }
+
+  return await db
     .update(lists)
     .set({ name: values.name, summary: values.description })
-    .where(eq(lists.id, listId));
+    .where(eq(lists.id, listId))
+    .then(() => NULL_SUCCESS)
+    .catch((err) => {
+      return { success: false, error: { code: 500, message: err } };
+    });
 };
 
-const deleteListAction = async (listId: string) => {
-  await db.delete(lists).where(eq(lists.id, listId));
-  await db.delete(listItems).where(eq(listItems.listId, listId));
+const deleteListAction = async (
+  listId: string,
+): Promise<ServerActionResult<null>> => {
+  const session = await auth();
+  if (!session || !(await hasListAccess(listId, session.user.id))) {
+    return Promise.reject(FORBIDDEN_ERROR);
+  }
+
+  return db
+    .transaction(async (tx) => {
+      await tx.delete(listItems).where(eq(listItems.listId, listId));
+      await tx.delete(lists).where(eq(lists.id, listId));
+    })
+    .then(() => NULL_SUCCESS)
+    .catch((err) => {
+      return { success: false, error: { code: 500, message: err } };
+    });
 };
 
 const fetchListItemsAction = async (listId: string) => {
@@ -62,7 +82,7 @@ const fetchListItemsAction = async (listId: string) => {
 
 const saveListItemAction = async (
   listId: string,
-  values: z.infer<typeof newItemSchema>,
+  values: z.infer<typeof itemSchema>,
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
   if (!session || !(await hasListAccess(listId, session.user.id))) {
@@ -89,7 +109,7 @@ const saveListItemAction = async (
 
 const updateListItemAction = async (
   itemId: string,
-  values: z.infer<typeof newItemSchema>,
+  values: z.infer<typeof itemSchema>,
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
   const parentList = (
