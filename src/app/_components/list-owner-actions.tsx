@@ -1,5 +1,5 @@
 "use client";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Plus, PlusIcon, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Popover,
@@ -8,7 +8,7 @@ import {
 } from "~/components/ui/popover";
 import { deleteListAction } from "~/server/actions";
 import { ListDetailsEditForm } from "./list-details-form";
-import { NewItemForm } from "./list-item-form";
+import { NewItemDialog } from "./list-item-form";
 import { useRouter } from "next/navigation";
 
 const OwnerActions = ({
@@ -32,7 +32,7 @@ const OwnerActions = ({
         Delete <Trash2 />
       </Button>
       <div className="flex flex-1 justify-end">
-        <NewItemForm listId={listId} />
+        <NewItemDialog listId={listId} variant="default">New Item <PlusIcon /></NewItemDialog>
       </div>
     </div>
   );

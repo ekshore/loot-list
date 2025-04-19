@@ -13,6 +13,7 @@ import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { lists, users } from "~/server/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { NewListDialog } from "./_components/list-details-form";
 
 export default async function Home() {
   return (
@@ -63,13 +64,15 @@ const ListDisplay = async () => {
   const session = await auth();
   if (session?.user) {
     listCards.push(
+      <NewListDialog key="newList">
       <Link key="create-list" href="/" className="m-5">
         <Card className="flex h-60 w-72 items-center justify-center">
           <CardContent className="flex items-center justify-center p-0">
             <SquarePlus className="size-20 text-border" />
           </CardContent>
         </Card>
-      </Link>,
+      </Link>
+      </NewListDialog>
     );
   }
 

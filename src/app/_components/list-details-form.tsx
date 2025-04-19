@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PopoverClose } from "@radix-ui/react-popover";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import {
@@ -16,7 +16,125 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { listDetailsSchema } from "~/server/validators";
-import { updateListDetailsAction } from "~/server/actions";
+import {
+  saveListDetailsAction,
+  updateListDetailsAction,
+} from "~/server/actions";
+import { useToast } from "~/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { ReactNode, useState } from "react";
+import { Button } from "~/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { Slot } from "@radix-ui/react-slot";
+
+type ListDetails = z.infer<typeof listDetailsSchema>;
+
+const ListDetailsForm = ({
+  form,
+}: {
+  form: UseFormReturn<ListDetails, any, ListDetails>;
+}) => {
+  return (
+    <>
+      <FormField
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>List Name</FormLabel>
+            <FormControl>
+              <Input placeholder="Cool List" {...field} />
+            </FormControl>
+            <FormDescription>This is the name of the list</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Input placeholder="What's this list for?" {...field} />
+            </FormControl>
+            <FormDescription>Tell people what this lists about</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
+};
+
+const NewListDialog = ({ children, ...props }: { children: ReactNode }) => {
+  const form = useForm<ListDetails>({
+    resolver: zodResolver(listDetailsSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
+
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const onSubmit = async (values: ListDetails) => {
+    console.log("Form Values: ", values);
+    await saveListDetailsAction(values)
+      .then((res) => {
+        if (!res.success) {
+          toast({
+            variant: "destructive",
+            title: "Oops, something went wrong",
+            description: "New List failed to save",
+          });
+          return;
+        }
+        setOpen(false);
+        router.push(`/lists/${res.data.id}`);
+      })
+      .catch((err) => {
+        toast({
+          variant: "destructive",
+          title: "Oops, something went wrong",
+          description: err,
+        });
+      });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create New List</DialogTitle>
+              <DialogDescription>
+                Create a new list to share with people
+              </DialogDescription>
+              <ListDetailsForm form={form} />
+              <DialogFooter className="mt-4">
+                <Button type="submit">Save</Button>
+              </DialogFooter>
+            </DialogHeader>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const ListDetailsEditForm = ({
   listId,
@@ -49,36 +167,7 @@ const ListDetailsEditForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>List Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Cool List" {...field} />
-              </FormControl>
-              <FormDescription>This is the name of the list</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input placeholder="What's this list for?" {...field} />
-              </FormControl>
-              <FormDescription>
-                Tell people what this lists about
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <ListDetailsForm form={form} />
         <PopoverClose
           type="submit"
           className="mt-2 h-10 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
@@ -90,4 +179,4 @@ const ListDetailsEditForm = ({
   );
 };
 
-export { ListDetailsEditForm };
+export { ListDetailsEditForm, NewListDialog };

@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PencilIcon, PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -31,10 +31,11 @@ import {
   updateListItemAction,
   deleteListItemAction,
 } from "~/server/actions";
+import { createSlot, Slot } from "@radix-ui/react-slot";
 
 type Item = z.infer<typeof itemSchema>;
 
-const ItemForm = ({ form }: { form: UseFormReturn<Item, any, undefined> }) => {
+const ItemForm = ({ form }: { form: UseFormReturn<Item, any, Item> }) => {
   return (
     <>
       <FormField
@@ -66,7 +67,7 @@ const ItemForm = ({ form }: { form: UseFormReturn<Item, any, undefined> }) => {
   );
 };
 
-const NewItemForm = ({ listId }: { listId: string }) => {
+const NewItemDialog = ({ listId }: { listId: string }) => {
   const form = useForm<Item>({
     resolver: zodResolver(itemSchema),
     defaultValues: {
@@ -95,7 +96,7 @@ const NewItemForm = ({ listId }: { listId: string }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default">
-          New Item <PlusIcon />
+        New Item <PlusIcon />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -178,4 +179,4 @@ const EditItemForm = ({ itemId, item }: { itemId: string; item: Item }) => {
     </Dialog>
   );
 };
-export { EditItemForm, NewItemForm };
+export { EditItemForm, NewItemDialog };

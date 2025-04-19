@@ -38,6 +38,63 @@ const fetchListDetailsAction = async (listId: string) => {
   return listDetails;
 };
 
+const saveListDetailsAction = async (
+  values: z.infer<typeof listDetailsSchema>,
+): Promise<ServerActionResult<{ id: string }>> => {
+  const session = await auth();
+  if (!session) {
+    return Promise.reject();
+  }
+
+  return await db.transaction(async (tx) => {
+    return await tx
+      .insert(lists)
+      .values({
+        name: values.name,
+        summary: values.description,
+        userId: session.user.id,
+      })
+      .returning()
+      .then((val): ServerActionResult<{ id: string }> => {
+        if (val.length < 1) {
+          tx.rollback();
+          return {
+            success: false,
+            error: {
+              code: 500,
+              message: "Nothing returned from list insert",
+            },
+          };
+        }
+        if (val.length > 1) {
+          tx.rollback();
+          return {
+            success: false,
+            error: {
+              code: 500,
+              message: "To many returns from list insert",
+            },
+          };
+        }
+
+        const list = val.pop();
+        return {
+          success: true,
+          data: { id: list!.id },
+        };
+      })
+      .catch((err) => {
+        return {
+          success: false,
+          error: {
+            code: 500,
+            message: err,
+          },
+        };
+      });
+  });
+};
+
 const updateListDetailsAction = async (
   listId: string,
   values: z.infer<typeof listDetailsSchema>,
@@ -180,6 +237,7 @@ const deleteListItemAction = async (
 
 export {
   fetchListDetailsAction,
+  saveListDetailsAction,
   updateListDetailsAction,
   deleteListAction,
   fetchListItemsAction,

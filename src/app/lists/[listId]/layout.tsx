@@ -6,6 +6,10 @@ import { db } from "~/server/db";
 import { lists, List } from "~/server/db/schema";
 import { desc, eq, ne } from "drizzle-orm";
 
+import { Button } from "~/components/ui/button";
+import { NewListDialog } from "~/app/_components/list-details-form";
+import { PlusIcon } from "lucide-react";
+
 export default async function ListsLayout({
   children,
   params,
@@ -14,6 +18,7 @@ export default async function ListsLayout({
   params: Promise<{ listId: string | undefined }>;
 }) {
   "server";
+  const session = await auth();
   const { myLists, sharedLists } = await fetchLists();
   const { listId } = await params;
 
@@ -23,7 +28,10 @@ export default async function ListsLayout({
         {myLists ? (
           <>
             <h2 className="m-4 text-xl font-bold">Your Lists</h2>
-            <ul>{displayLists(myLists, listId)}</ul>
+            <ul>
+              {displayLists(myLists, listId)}
+              {session && session.user ? <NewList /> : <></>}
+            </ul>
           </>
         ) : (
           <></>
@@ -78,4 +86,24 @@ const displayLists = (lists: List[], selectedList?: string) => {
       </li>
     );
   });
+};
+
+const NewList = () => {
+  return (
+    <li
+      className="bg-primary text-primary-foreground hover:bg-primary/80"
+      key="NewList"
+    >
+      <NewListDialog>
+        <Link href="">
+          <Separator />
+          <div className="py-4">
+            <span className="m-4">
+              Create List <PlusIcon className="pb-1 inline" size="20px"/>
+            </span>
+          </div>
+        </Link>
+      </NewListDialog>
+    </li>
+  );
 };
