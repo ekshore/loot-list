@@ -11,10 +11,6 @@ const Header = async () => {
       <div className="container mx-auto flex h-14 items-center border-x border-x-border bg-background px-4">
         <div className="flex">
           <Link href="/">Loot List</Link>
-          <nav className="flex items-center gap-4 px-4 text-sm">
-            <Link href="/lists/mylists">My Lists</Link>
-            <Link href="/shared-lists">Shared Lists</Link>
-          </nav>
         </div>
         <div className="flex flex-1 items-center justify-end gap-4">
           <ThemeToggle />
