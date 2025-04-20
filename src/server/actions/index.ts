@@ -29,6 +29,7 @@ const fetchUserLists = async () => {
   const session = await auth();
 
   if (!session || !session.user) {
+    console.log("fetchUserLists() - No user session denying request");
     return Promise.reject("No User Session, FORBIDDEN");
   }
 
@@ -51,6 +52,7 @@ const fetchSharedLists = async () => {
   const session = await auth();
 
   if (!session || !session.user) {
+    console.log("fetchSharedLists() - No user session denying request");
     return Promise.reject("No User Session, FORBIDDEN");
   }
 
@@ -83,6 +85,9 @@ const fetchListDetailsAction = async (listId: string) => {
     !listDetails ||
     (!listDetails.public && listDetails.userId !== session?.user.id)
   ) {
+    console.log(
+      "fetchListDetailsAction() - User is not authorized for this list denying request",
+    );
     return Promise.reject(UNAUTHORIZED_ERROR);
   }
   return listDetails;
@@ -93,6 +98,7 @@ const saveListDetailsAction = async (
 ): Promise<ServerActionResult<{ id: string }>> => {
   const session = await auth();
   if (!session) {
+    console.log("saveListDetailsAction() - No user session denying request");
     return Promise.reject();
   }
 
@@ -108,6 +114,10 @@ const saveListDetailsAction = async (
       .returning()
       .then((val): ServerActionResult<{ id: string }> => {
         if (val.length < 1) {
+          console.log(
+            "saveListItemAction() - Nothing returned from insert rolling back transaction",
+          );
+          console.log(values);
           tx.rollback();
           return {
             success: false,
@@ -118,6 +128,10 @@ const saveListDetailsAction = async (
           };
         }
         if (val.length > 1) {
+          console.log(
+            "saveListItemAction() - To many returns from list insert, rolling back transaction",
+          );
+          console.log(values);
           tx.rollback();
           return {
             success: false,
@@ -135,6 +149,8 @@ const saveListDetailsAction = async (
         };
       })
       .catch((err) => {
+        console.log("saveListItemAction() - Error occured during insert");
+        console.log(err);
         return {
           success: false,
           error: {
@@ -152,6 +168,9 @@ const updateListDetailsAction = async (
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
   if (!session || !(await hasListAccess(listId, session.user.id))) {
+    console.log(
+      "updateListDetailsAction() - User is unauthorized denying reqeust",
+    );
     return Promise.reject();
   }
 
@@ -165,6 +184,8 @@ const updateListDetailsAction = async (
     .where(eq(lists.id, listId))
     .then(() => NULL_SUCCESS)
     .catch((err) => {
+      console.log("updateLIstDetailsAction() - Error during update");
+      console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
 };
@@ -174,6 +195,7 @@ const deleteListAction = async (
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
   if (!session || !(await hasListAccess(listId, session.user.id))) {
+    console.log("deleteListAction() - User is unauthorized denying request");
     return Promise.reject(FORBIDDEN_ERROR);
   }
 
@@ -184,10 +206,13 @@ const deleteListAction = async (
     })
     .then(() => NULL_SUCCESS)
     .catch((err) => {
+      console.log("deleteListAction() - Error during delete");
+      console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
 };
 
+// TODO: Add auth on this
 const fetchListItemsAction = async (listId: string) => {
   return await db.select().from(listItems).where(eq(listItems.listId, listId));
 };
@@ -198,6 +223,7 @@ const saveListItemAction = async (
 ): Promise<ServerActionResult<null>> => {
   const session = await auth();
   if (!session || !(await hasListAccess(listId, session.user.id))) {
+    console.log("saveListItemAction() - User is unauthorized denying reqeust");
     return Promise.reject(FORBIDDEN_ERROR);
   }
 
@@ -215,6 +241,8 @@ const saveListItemAction = async (
     })
     .then(() => NULL_SUCCESS)
     .catch((err) => {
+      console.log("saveListItemAction() - Error during insert");
+      console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
 };
@@ -236,6 +264,9 @@ const updateListItemAction = async (
     !parentList ||
     !(await hasListAccess(parentList.id, session.user.id))
   ) {
+    console.log(
+      "updateListDetailsAction() - User is unauthorized denying request",
+    );
     return Promise.reject(FORBIDDEN_ERROR);
   }
 
@@ -252,6 +283,8 @@ const updateListItemAction = async (
     })
     .then(() => NULL_SUCCESS)
     .catch((err) => {
+      console.log("updateListItemAction() - Error during update");
+      console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
 };
@@ -272,6 +305,9 @@ const deleteListItemAction = async (
     !parentList ||
     !hasListAccess(parentList.id, session.user.id)
   ) {
+    console.log(
+      "deleteListItemAction() - User is unauthorized denying reqeust",
+    );
     return Promise.reject(FORBIDDEN_ERROR);
   }
 
@@ -284,6 +320,8 @@ const deleteListItemAction = async (
   })
     .then(() => NULL_SUCCESS)
     .catch((err) => {
+      console.log("deleteLIstItemAction() - Error during delete");
+      console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
 
@@ -315,8 +353,10 @@ const hasListAccess = async (listId: string, userId: string) => {
     `Checking access for list: ${listId}, userId for list is: ${list?.userId}`,
   );
   if (list && list.userId === userId) {
+    console.log("Access Granted");
     return true;
   } else {
+    console.log("Access Denied");
     return false;
   }
 };
