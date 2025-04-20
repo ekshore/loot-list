@@ -3,7 +3,7 @@ import { auth } from "../auth";
 import { listDetailsSchema, itemSchema } from "~/server/validators";
 import { lists, listItems, users } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { and, desc, eq, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
 type ServerActionResult<T> =

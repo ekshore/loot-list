@@ -1,11 +1,6 @@
 "use client";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import { deleteListAction } from "~/server/actions";
 import { ListDetailsEditForm } from "./list-details-form";
 import { NewItemDialog } from "./list-item-form";
@@ -29,7 +24,12 @@ const OwnerActions = ({
   };
   return (
     <div className="my-2 flex flex-row gap-4">
-      <EditListDetails listId={listId} name={name} desc={desc} isPublic={isPublic}/>
+      <EditListDetails
+        listId={listId}
+        name={name}
+        desc={desc}
+        isPublic={isPublic}
+      />
       <Button type="button" variant="destructive" onClick={handleDeleteList}>
         Delete <Trash2 />
       </Button>
@@ -52,19 +52,11 @@ const EditListDetails = ({
   isPublic: boolean;
 }) => {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="secondary">
-          Edit <Pencil />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent>
-        <div className="flex flex-col">
-          Edit List Details.
-          <ListDetailsEditForm listId={listId} name={name} desc={desc} isPublic={isPublic}/>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <ListDetailsEditForm listId={listId} name={name} desc={desc} isPublic={isPublic}>
+      <Button variant="secondary">
+        Edit <Pencil />
+      </Button>
+    </ListDetailsEditForm>
   );
 };
 

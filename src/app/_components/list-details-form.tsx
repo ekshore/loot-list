@@ -1,7 +1,5 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PopoverClose } from "@radix-ui/react-popover";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -77,7 +75,10 @@ const ListDetailsForm = ({
         render={({ field }) => (
           <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
             <FormControl>
-              <Checkbox checked={field.value} onCheckedChange={field.onChange}/>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
             </FormControl>
             <div className="space-y-1 leading-none">
               <FormLabel>Public</FormLabel>
@@ -158,11 +159,13 @@ const ListDetailsEditForm = ({
   name,
   desc,
   isPublic,
+  children,
 }: {
   listId: string;
   name: string;
   desc: string;
   isPublic: boolean;
+  children: ReactNode;
 }) => {
   const form = useForm<z.infer<typeof listDetailsSchema>>({
     resolver: zodResolver(listDetailsSchema),
@@ -174,6 +177,7 @@ const ListDetailsEditForm = ({
   });
 
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const onSubmit = async (values: z.infer<typeof listDetailsSchema>) => {
     console.log(values);
@@ -182,21 +186,30 @@ const ListDetailsEditForm = ({
       description: values.description,
       public: values.public,
     });
+    setOpen(false);
     router.refresh();
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <ListDetailsForm form={form} />
-        <PopoverClose
-          type="submit"
-          className="mt-2 h-10 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
-        >
-          Save
-        </PopoverClose>
-      </form>
-    </Form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Edit List</DialogTitle>
+              <DialogDescription>
+                Make changes to this list
+              </DialogDescription>
+              <ListDetailsForm form={form} />
+              <DialogFooter className="mt-4">
+                <Button type="submit">Save</Button>
+              </DialogFooter>
+            </DialogHeader>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
