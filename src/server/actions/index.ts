@@ -3,7 +3,7 @@ import { auth } from "../auth";
 import { listDetailsSchema, itemSchema } from "~/server/validators";
 import { lists, listItems, users } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { eq, sql } from "drizzle-orm";
+import { and, desc, eq, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 type ServerActionResult<T> =
@@ -20,8 +20,50 @@ const NULL_SUCCESS: ServerActionResult<null> = {
   success: true,
   data: null,
 } as const;
+const UNAUTHORIZED_ERROR: ServerActionError = {
+  code: 401,
+  message: "UNAUTHORIZED",
+} as const;
+
+const fetchUserLists = async () => {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return Promise.reject("No User Session, FORBIDDEN");
+  }
+
+  return await db
+    .select()
+    .from(lists)
+    .where(eq(lists.userId, session.user.id))
+    .orderBy(desc(lists.updatedAt));
+};
+
+const fetchPublicLists = async () => {
+  return await db
+    .select()
+    .from(lists)
+    .where(eq(lists.public, true))
+    .orderBy(desc(lists.updatedAt));
+};
+
+const fetchSharedLists = async () => {
+  const session = await auth();
+
+  if (!session || !session.user) {
+    return Promise.reject("No User Session, FORBIDDEN");
+  }
+
+  return await db
+    .select()
+    .from(lists)
+    .where(and(eq(lists.public, true), ne(lists.userId, session.user.id)))
+    .orderBy(desc(lists.updatedAt));
+};
 
 const fetchListDetailsAction = async (listId: string) => {
+  const session = await auth();
+
   const listDetails = (
     await db
       .select({
@@ -30,11 +72,19 @@ const fetchListDetailsAction = async (listId: string) => {
         updated: lists.updatedAt,
         owner: users.name,
         userId: users.id,
+        public: lists.public,
       })
       .from(lists)
       .innerJoin(users, eq(users.id, lists.userId))
       .where(eq(lists.id, listId))
   ).pop();
+
+  if (
+    !listDetails ||
+    (!listDetails.public && listDetails.userId !== session?.user.id)
+  ) {
+    return Promise.reject(UNAUTHORIZED_ERROR);
+  }
   return listDetails;
 };
 
@@ -53,6 +103,7 @@ const saveListDetailsAction = async (
         name: values.name,
         summary: values.description,
         userId: session.user.id,
+        public: values.public,
       })
       .returning()
       .then((val): ServerActionResult<{ id: string }> => {
@@ -106,7 +157,11 @@ const updateListDetailsAction = async (
 
   return await db
     .update(lists)
-    .set({ name: values.name, summary: values.description })
+    .set({
+      name: values.name,
+      summary: values.description,
+      public: values.public,
+    })
     .where(eq(lists.id, listId))
     .then(() => NULL_SUCCESS)
     .catch((err) => {
@@ -237,6 +292,9 @@ const deleteListItemAction = async (
 
 export {
   fetchListDetailsAction,
+  fetchUserLists,
+  fetchPublicLists,
+  fetchSharedLists,
   saveListDetailsAction,
   updateListDetailsAction,
   deleteListAction,

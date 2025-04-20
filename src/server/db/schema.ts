@@ -1,5 +1,6 @@
 import { relations, sql, type InferSelectModel } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -124,6 +125,7 @@ export const lists = createTable("lists", {
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .$onUpdate(() => new Date()),
+  public: boolean("public").default(false).notNull(),
 });
 
 export const listsRelations = relations(lists, ({ one, many }) => ({
@@ -132,7 +134,6 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
 }));
 
 export type List = InferSelectModel<typeof lists>;
-
 
 export const listItems = createTable("list_items", {
   id: varchar("id", { length: 255 })

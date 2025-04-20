@@ -1,5 +1,5 @@
 "use client";
-import { Pencil, Plus, PlusIcon, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Popover,
@@ -15,10 +15,12 @@ const OwnerActions = ({
   listId,
   name,
   desc,
+  isPublic,
 }: {
   listId: string;
   name: string;
   desc: string;
+  isPublic: boolean;
 }) => {
   const router = useRouter();
   const handleDeleteList = async () => {
@@ -27,12 +29,12 @@ const OwnerActions = ({
   };
   return (
     <div className="my-2 flex flex-row gap-4">
-      <EditListDetails listId={listId} name={name} desc={desc} />
+      <EditListDetails listId={listId} name={name} desc={desc} isPublic={isPublic}/>
       <Button type="button" variant="destructive" onClick={handleDeleteList}>
         Delete <Trash2 />
       </Button>
       <div className="flex flex-1 justify-end">
-        <NewItemDialog listId={listId} variant="default">New Item <PlusIcon /></NewItemDialog>
+        <NewItemDialog listId={listId} />
       </div>
     </div>
   );
@@ -42,10 +44,12 @@ const EditListDetails = ({
   listId,
   name,
   desc,
+  isPublic,
 }: {
   listId: string;
   name: string;
   desc: string;
+  isPublic: boolean;
 }) => {
   return (
     <Popover>
@@ -57,7 +61,7 @@ const EditListDetails = ({
       <PopoverContent>
         <div className="flex flex-col">
           Edit List Details.
-          <ListDetailsEditForm listId={listId} name={name} desc={desc} />
+          <ListDetailsEditForm listId={listId} name={name} desc={desc} isPublic={isPublic}/>
         </div>
       </PopoverContent>
     </Popover>

@@ -12,14 +12,14 @@ import {
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { lists, users } from "~/server/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, or } from "drizzle-orm";
 import { NewListDialog } from "./_components/list-details-form";
 
 export default async function Home() {
   return (
     <>
       <div className="flex flex-col items-center">
-        <h1 className="py-5 text-5xl font-bold">Ekstrand Family Lists</h1>
+        <h1 className="py-5 text-5xl font-bold">Your Lists</h1>
         <ListDisplay />
       </div>
     </>
@@ -28,6 +28,8 @@ export default async function Home() {
 
 const ListDisplay = async () => {
   "server";
+  const session = await auth();
+
   const wishLists = await db
     .select({
       id: lists.id,
@@ -38,6 +40,7 @@ const ListDisplay = async () => {
     })
     .from(lists)
     .innerJoin(users, eq(users.id, lists.userId))
+    .where(or(eq(users.id, session?.user.id ?? ""), eq(lists.public, true)))
     .orderBy(desc(lists.updatedAt));
 
   const listCards = wishLists.map((item) => {
@@ -61,18 +64,17 @@ const ListDisplay = async () => {
     );
   });
 
-  const session = await auth();
   if (session?.user) {
     listCards.push(
       <NewListDialog key="newList">
-      <Link key="create-list" href="/" className="m-5">
-        <Card className="flex h-60 w-72 items-center justify-center">
-          <CardContent className="flex items-center justify-center p-0">
-            <SquarePlus className="size-20 text-border" />
-          </CardContent>
-        </Card>
-      </Link>
-      </NewListDialog>
+        <Link key="create-list" href="/" className="m-5">
+          <Card className="flex h-60 w-72 items-center justify-center">
+            <CardContent className="flex items-center justify-center p-0">
+              <SquarePlus className="size-20 text-border" />
+            </CardContent>
+          </Card>
+        </Link>
+      </NewListDialog>,
     );
   }
 

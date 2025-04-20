@@ -2,13 +2,15 @@ import Link from "next/link";
 import { Separator } from "~/components/ui/separator";
 import React from "react";
 import { auth } from "~/server/auth";
-import { db } from "~/server/db";
-import { lists, List } from "~/server/db/schema";
-import { desc, eq, ne } from "drizzle-orm";
 
-import { Button } from "~/components/ui/button";
 import { NewListDialog } from "~/app/_components/list-details-form";
 import { PlusIcon } from "lucide-react";
+import {
+  fetchPublicLists,
+  fetchSharedLists,
+  fetchUserLists,
+} from "~/server/actions";
+import { List } from "~/server/db/schema";
 
 export default async function ListsLayout({
   children,
@@ -54,19 +56,12 @@ export default async function ListsLayout({
 const fetchLists = async () => {
   const session = await auth();
   if (session) {
-    const usersLists = await db
-      .select()
-      .from(lists)
-      .where(eq(lists.userId, session.user.id))
-      .orderBy(desc(lists.updatedAt));
-    const sharedLists = await db
-      .select()
-      .from(lists)
-      .where(ne(lists.userId, session.user.id))
-      .orderBy(desc(lists.updatedAt));
+    const usersLists = await fetchUserLists();
+    // TODO This will be replaced with lists that have been shared between users.
+    const sharedLists = await fetchSharedLists();
     return { myLists: usersLists, sharedLists: sharedLists };
   } else {
-    const allLists = await db.select().from(lists);
+    const allLists = await fetchPublicLists();
     return { myLists: null, sharedLists: allLists };
   }
 };
@@ -99,7 +94,7 @@ const NewList = () => {
           <Separator />
           <div className="py-4">
             <span className="m-4">
-              Create List <PlusIcon className="pb-1 inline" size="20px"/>
+              Create List <PlusIcon className="inline pb-1" size="20px" />
             </span>
           </div>
         </Link>

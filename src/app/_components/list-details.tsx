@@ -4,6 +4,7 @@ import { fetchListDetailsAction } from "~/server/actions";
 
 const ListDetails = async ({ listId }: { listId: string }) => {
   const listDetails = await fetchListDetailsAction(listId);
+  console.log(listDetails);
 
   if (!listDetails) {
     return (
@@ -31,6 +32,7 @@ const ListDetails = async ({ listId }: { listId: string }) => {
           listId={listId}
           name={listDetails.name}
           desc={listDetails.description}
+          isPublic={listDetails.public}
         />
       ) : (
         <></>

@@ -30,10 +30,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { ReactNode, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { PlusIcon } from "lucide-react";
-import { Slot } from "@radix-ui/react-slot";
+import { Checkbox } from "~/components/ui/checkbox";
+import { ReactNode, useState } from "react";
 
 type ListDetails = z.infer<typeof listDetailsSchema>;
 
@@ -72,16 +71,34 @@ const ListDetailsForm = ({
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="public"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+            <FormControl>
+              <Checkbox checked={field.value} onCheckedChange={field.onChange}/>
+            </FormControl>
+            <div className="space-y-1 leading-none">
+              <FormLabel>Public</FormLabel>
+              <FormDescription>
+                Do you want other people to be able to view this list
+              </FormDescription>
+            </div>
+          </FormItem>
+        )}
+      />
     </>
   );
 };
 
-const NewListDialog = ({ children, ...props }: { children: ReactNode }) => {
+const NewListDialog = ({ children }: { children: ReactNode }) => {
   const form = useForm<ListDetails>({
     resolver: zodResolver(listDetailsSchema),
     defaultValues: {
       name: "",
       description: "",
+      public: false,
     },
   });
 
@@ -140,16 +157,19 @@ const ListDetailsEditForm = ({
   listId,
   name,
   desc,
+  isPublic,
 }: {
   listId: string;
   name: string;
   desc: string;
+  isPublic: boolean;
 }) => {
   const form = useForm<z.infer<typeof listDetailsSchema>>({
     resolver: zodResolver(listDetailsSchema),
     defaultValues: {
       name: name,
       description: desc,
+      public: isPublic,
     },
   });
 
@@ -160,6 +180,7 @@ const ListDetailsEditForm = ({
     await updateListDetailsAction(listId, {
       name: values.name,
       description: values.description,
+      public: values.public,
     });
     router.refresh();
   };
