@@ -4,7 +4,6 @@ import { fetchListDetailsAction } from "~/server/actions";
 
 const ListDetails = async ({ listId }: { listId: string }) => {
   const listDetails = await fetchListDetailsAction(listId);
-  console.log(listDetails);
 
   if (!listDetails) {
     return (

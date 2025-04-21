@@ -86,7 +86,7 @@ const displayLists = (lists: List[], selectedList?: string) => {
 const NewList = () => {
   return (
     <li
-      className="bg-primary text-primary-foreground hover:bg-primary/80"
+      className="hover:bg-primary hover:text-primary-foreground"
       key="NewList"
     >
       <NewListDialog>
