@@ -62,6 +62,19 @@ const ItemForm = ({ form }: { form: UseFormReturn<Item, any, Item> }) => {
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="url"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Web store link</FormLabel>
+            <FormControl>
+              <Input placeholder="amazon.com" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   );
 };
@@ -72,6 +85,7 @@ const NewItemDialog = ({ listId }: { listId: string }) => {
     defaultValues: {
       name: "",
       description: "",
+      url: "",
     },
   });
 
@@ -132,6 +146,7 @@ const EditItemForm = ({
     defaultValues: {
       name: item.name,
       description: item.description,
+      url: item.url,
     },
   });
 
@@ -163,7 +178,9 @@ const EditItemForm = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className={className} variant="link">
-          <span className="flex flex-row text-xs text-muted-foreground">Edit <PencilLineIcon size="" className="mx-2"/></span>
+          <span className="flex flex-row text-xs text-muted-foreground">
+            Edit <PencilLineIcon size="" className="mx-2" />
+          </span>
         </Button>
       </DialogTrigger>
       <DialogContent>

@@ -8,6 +8,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import Link from "next/link";
+import { SquareArrowOutUpRightIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 const MY_LISTS: string = "mylists" as const;
 const ListPage = async ({
@@ -60,8 +63,23 @@ const ListView = async ({ listId }: { listId: string }) => {
       <AccordionItem value={item.id} key={item.id}>
         <AccordionTrigger className="ml-4">{item.name}</AccordionTrigger>
         <AccordionContent className="ml-4">
-          <div>{item.description}</div>
-          <div className="flex justify-end">{editButton}</div>
+          <div className="flex flex-col">
+            <div>{item.description}</div>
+          </div>
+          <div className="my-4 flex flex-row">
+            <div>
+              {item.url ? (
+                <Link href={item.url} target="_blank">
+                  <Button variant="secondary">
+                    View in Store <SquareArrowOutUpRightIcon />
+                  </Button>
+                </Link>
+              ) : (
+                <></>
+              )}
+            </div>
+            <div className="flex w-full justify-end">{editButton}</div>
+          </div>
         </AccordionContent>
       </AccordionItem>
     );

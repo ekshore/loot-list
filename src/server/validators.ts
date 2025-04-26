@@ -8,7 +8,15 @@ const listDetailsSchema = z.object({
 
 const itemSchema = z.object({
   name: z.string().min(2).max(50),
-  description: z.string().max(255),
+  description: z
+    .string()
+    .max(500)
+    .optional()
+    .transform((val) => (val === "" ? undefined : val)),
+  url: z
+    .union([z.string().url(), z.literal("")])
+    .optional()
+    .transform((val) => (val === "" ? undefined : val)),
 });
 
 export { listDetailsSchema, itemSchema };

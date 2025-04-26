@@ -115,7 +115,7 @@ const saveListDetailsAction = async (
       .then((val): ServerActionResult<{ id: string }> => {
         if (val.length < 1) {
           console.log(
-            "saveListItemAction() - Nothing returned from insert rolling back transaction",
+            "saveListAction() - Nothing returned from insert rolling back transaction",
           );
           console.log(values);
           tx.rollback();
@@ -129,7 +129,7 @@ const saveListDetailsAction = async (
         }
         if (val.length > 1) {
           console.log(
-            "saveListItemAction() - To many returns from list insert, rolling back transaction",
+            "saveListAction() - To many returns from list insert, rolling back transaction",
           );
           console.log(values);
           tx.rollback();
@@ -149,7 +149,7 @@ const saveListDetailsAction = async (
         };
       })
       .catch((err) => {
-        console.log("saveListItemAction() - Error occured during insert");
+        console.log("saveListAction() - Error occured during insert");
         console.log(err);
         return {
           success: false,
@@ -234,6 +234,7 @@ const saveListItemAction = async (
         listId: listId,
         name: values.name,
         description: values.description,
+        url: values.url,
       });
       await tx
         .update(lists)
@@ -275,7 +276,11 @@ const updateListItemAction = async (
     .transaction(async (tx) => {
       await tx
         .update(listItems)
-        .set({ name: values.name, description: values.description })
+        .set({
+          name: values.name,
+          description: values.description,
+          url: values.url && values.url.length > 1 ? values.url : undefined,
+        })
         .where(eq(listItems.id, itemId));
       await tx
         .update(lists)

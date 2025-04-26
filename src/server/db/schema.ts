@@ -144,8 +144,9 @@ export const listItems = createTable("list_items", {
     .notNull()
     .references(() => lists.id),
   name: varchar("name", { length: 255 }).notNull(),
-  description: varchar("description", { length: 255 }),
+  description: varchar("description", { length: 500 }),
   datePurchased: timestamp("date_purchased", { withTimezone: true }),
+  url: varchar("url", { length: 2000 }),
 });
 
 export const listItemRelations = relations(listItems, ({ one }) => ({
