@@ -3,12 +3,11 @@ import { fetchListItemsAction } from "~/server/actions";
 import { auth } from "~/server/auth";
 import { EditItemForm } from "~/app/_components/list-item-form";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 
 const MY_LISTS: string = "mylists" as const;
 const ListPage = async ({
@@ -43,28 +42,38 @@ const ListView = async ({ listId }: { listId: string }) => {
   }
 
   const itemCards = listItems.map((item) => {
-    const formData = {
+    const editFormData = {
       name: item.name,
       description: item.description ?? "",
     };
+    const editButton =
+      session && session.user.id ? (
+        <EditItemForm
+          itemId={item.id}
+          item={editFormData}
+          className="ml-[-10] mr-2"
+        />
+      ) : (
+        <></>
+      );
     return (
-      <Card key={item.id}>
-        <CardHeader>
-          <CardTitle>{item.name}</CardTitle>
-        </CardHeader>
-        <CardContent className="h-52">{item.description}</CardContent>
-        <CardFooter>
-          {session && session.user ? (
-            <EditItemForm itemId={item.id} item={formData} />
-          ) : (
-            <></>
-          )}
-        </CardFooter>
-      </Card>
+      <AccordionItem value={item.id} key={item.id}>
+        <AccordionTrigger className="ml-4">{item.name}</AccordionTrigger>
+        <AccordionContent className="ml-4">
+          <div>{item.description}</div>
+          <div className="flex justify-end">{editButton}</div>
+        </AccordionContent>
+      </AccordionItem>
     );
   });
 
-  return <div className="my-16 grid grid-cols-3 gap-6">{itemCards}</div>;
+  return (
+    <div className="flex flex-row justify-center">
+      <Accordion type="single" collapsible className="my-16 w-full">
+        {itemCards}
+      </Accordion>
+    </div>
+  );
 };
 
 const ListSplashPage = () => {

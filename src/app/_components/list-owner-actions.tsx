@@ -1,5 +1,5 @@
 "use client";
-import { Pencil, Trash2 } from "lucide-react";
+import { PencilLineIcon, Trash2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { deleteListAction } from "~/server/actions";
 import { ListDetailsEditForm } from "./list-details-form";
@@ -54,7 +54,7 @@ const EditListDetails = ({
   return (
     <ListDetailsEditForm listId={listId} name={name} desc={desc} isPublic={isPublic}>
       <Button variant="secondary">
-        Edit <Pencil />
+        Edit <PencilLineIcon />
       </Button>
     </ListDetailsEditForm>
   );

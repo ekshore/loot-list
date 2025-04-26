@@ -1,8 +1,8 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PencilIcon, PlusIcon } from "lucide-react";
+import { PencilLineIcon, PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -31,7 +31,6 @@ import {
   updateListItemAction,
   deleteListItemAction,
 } from "~/server/actions";
-import { createSlot, Slot } from "@radix-ui/react-slot";
 
 type Item = z.infer<typeof itemSchema>;
 
@@ -96,7 +95,7 @@ const NewItemDialog = ({ listId }: { listId: string }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default">
-        New Item <PlusIcon />
+          New Item <PlusIcon />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -119,7 +118,15 @@ const NewItemDialog = ({ listId }: { listId: string }) => {
   );
 };
 
-const EditItemForm = ({ itemId, item }: { itemId: string; item: Item }) => {
+const EditItemForm = ({
+  itemId,
+  item,
+  className,
+}: {
+  itemId: string;
+  item: Item;
+  className: string;
+}) => {
   const form = useForm<Item>({
     resolver: zodResolver(itemSchema),
     defaultValues: {
@@ -155,8 +162,8 @@ const EditItemForm = ({ itemId, item }: { itemId: string; item: Item }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary">
-          Edit <PencilIcon />
+        <Button className={className} variant="link">
+          <span className="flex flex-row text-xs text-muted-foreground">Edit <PencilLineIcon size="" className="mx-2"/></span>
         </Button>
       </DialogTrigger>
       <DialogContent>
