@@ -52,7 +52,12 @@ const EditListDetails = ({
   isPublic: boolean;
 }) => {
   return (
-    <ListDetailsEditForm listId={listId} name={name} desc={desc} isPublic={isPublic}>
+    <ListDetailsEditForm
+      listId={listId}
+      name={name}
+      desc={desc}
+      isPublic={isPublic}
+    >
       <Button variant="secondary">
         Edit <PencilLineIcon />
       </Button>
