@@ -180,6 +180,7 @@ const updateListDetailsAction = async (
       name: values.name,
       summary: values.description,
       public: values.public,
+      updatedAt: sql`CURRENT_TIMESTAMP`,
     })
     .where(eq(lists.id, listId))
     .then(() => NULL_SUCCESS)
