@@ -1,0 +1,1 @@
+ALTER TABLE "lootlist_list_items" ALTER COLUMN "description" SET DATA TYPE varchar(500);
