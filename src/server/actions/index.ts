@@ -63,6 +63,28 @@ const fetchSharedLists = async () => {
     .orderBy(desc(lists.updatedAt));
 };
 
+const isListOwnerAction = async (listId: string) => {
+  const session = await auth();
+  if (!session || !session.user) {
+    return false;
+  }
+  return await db
+    .select({ ownerId: lists.userId })
+    .from(lists)
+    .where(eq(lists.id, listId))
+    .limit(1)
+    .then((val) => {
+      if (!val || val.length !== 1) {
+        return false;
+      }
+      if (val.pop()?.ownerId !== session.user.id) {
+        return false;
+      }
+      return true;
+    })
+    .catch(() => false);
+};
+
 const fetchListDetailsAction = async (listId: string) => {
   const session = await auth();
 
@@ -185,7 +207,7 @@ const updateListDetailsAction = async (
     .where(eq(lists.id, listId))
     .then(() => NULL_SUCCESS)
     .catch((err) => {
-      console.log("updateLIstDetailsAction() - Error during update");
+      console.log("updateListDetailsAction() - Error during update");
       console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
@@ -295,6 +317,85 @@ const updateListItemAction = async (
     });
 };
 
+const markItemAsPurchasedAction = async (
+  itemId: string,
+): Promise<ServerActionResult<Date>> => {
+  return await db
+    .update(listItems)
+    .set({ datePurchased: sql`CURRENT_TIMESTAMP` })
+    .where(eq(listItems.id, itemId))
+    .returning({ datePurchased: listItems.datePurchased })
+    .then((data): ServerActionResult<Date> => {
+      if (data.length < 1) {
+        console.log(
+          "markItemAsPurchasedAction() - no values returned from update",
+        );
+        return {
+          success: false,
+          error: {
+            code: 500,
+            message: "No returned updated value",
+          },
+        };
+      }
+      if (data.length > 1) {
+        console.log(
+          "markItemAsPurchasedAction() - to many values returned from update",
+        );
+        return {
+          success: false,
+          error: {
+            code: 500,
+            message: "To many values returned from update",
+          },
+        };
+      }
+      const datePurchased = data.pop()?.datePurchased;
+      if (!datePurchased) {
+        return {
+          success: false,
+          error: {
+            code: 500,
+            message: "markItemAsPurchasedAction() - date returned was null",
+          },
+        };
+      }
+      return {
+        success: true,
+        data: datePurchased,
+      };
+    })
+    .catch((err) => {
+      console.log(
+        "markItemAsPurchasedAction() - failed to mark item as purchase",
+        err,
+      );
+      return {
+        success: false,
+        error: { code: 500, message: "Failed to mark item as purchased" },
+      };
+    });
+};
+
+const removePurchasedDate = async (
+  itemId: string,
+): Promise<ServerActionResult<null>> => {
+  return await db
+    .update(listItems)
+    .set({ datePurchased: null })
+    .where(eq(listItems.id, itemId))
+    .then(() => NULL_SUCCESS)
+    .catch((err) => {
+      return Promise.reject({
+        success: false,
+        error: {
+          code: 500,
+          message: err,
+        },
+      });
+    });
+};
+
 const deleteListItemAction = async (
   itemId: string,
 ): Promise<ServerActionResult<null>> => {
@@ -326,7 +427,7 @@ const deleteListItemAction = async (
   })
     .then(() => NULL_SUCCESS)
     .catch((err) => {
-      console.log("deleteLIstItemAction() - Error during delete");
+      console.log("deleteListItemAction() - Error during delete");
       console.log(err);
       return { success: false, error: { code: 500, message: err } };
     });
@@ -339,12 +440,15 @@ export {
   fetchUserLists,
   fetchPublicLists,
   fetchSharedLists,
+  isListOwnerAction,
   saveListDetailsAction,
   updateListDetailsAction,
   deleteListAction,
   fetchListItemsAction,
   saveListItemAction,
   updateListItemAction,
+  markItemAsPurchasedAction,
+  removePurchasedDate,
   deleteListItemAction,
 };
 

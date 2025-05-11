@@ -179,7 +179,7 @@ const EditItemForm = ({
       <DialogTrigger asChild>
         <Button className={className} variant="link">
           <span className="flex flex-row text-xs text-muted-foreground">
-            Edit <PencilLineIcon size="" className="mx-2" />
+            Edit <PencilLineIcon className="mx-2" />
           </span>
         </Button>
       </DialogTrigger>
