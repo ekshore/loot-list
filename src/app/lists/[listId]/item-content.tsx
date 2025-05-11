@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckIcon, SquareArrowOutUpRightIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useState } from "react";
 import { EditItemForm } from "~/app/_components/list-item-form";

@@ -1,7 +1,6 @@
 import { ListDetails } from "~/app/_components/list-details";
 import { fetchListItemsAction, isListOwnerAction } from "~/server/actions";
 import { ItemAccordian } from "./item-content";
-import { auth } from "~/server/auth";
 
 const MY_LISTS: string = "mylists" as const;
 const ListPage = async ({
