@@ -3,7 +3,6 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
-import { TRPCReactProvider } from "~/trpc/react";
 import { ThemeProvider } from "~/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
 import { Header } from "~/app/_components/header";
@@ -25,7 +24,6 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <TRPCReactProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -40,7 +38,6 @@ export default function RootLayout({
               <Toaster />
             </SessionProvider>
           </ThemeProvider>
-        </TRPCReactProvider>
       </body>
     </html>
   );
