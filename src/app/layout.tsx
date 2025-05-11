@@ -7,6 +7,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ThemeProvider } from "~/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
 import { Header } from "~/app/_components/header";
+import { Toaster } from "~/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Loot List",
@@ -36,6 +37,7 @@ export default function RootLayout({
               <main className="container m-auto min-h-screen border-x border-x-border">
                 {children}
               </main>
+              <Toaster />
             </SessionProvider>
           </ThemeProvider>
         </TRPCReactProvider>
