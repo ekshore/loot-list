@@ -25,7 +25,7 @@ const UNAUTHORIZED_ERROR: ServerActionError = {
   message: "UNAUTHORIZED",
 } as const;
 
-const fetchUserLists = async () => {
+const fetchUserListsAction = async () => {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -40,7 +40,7 @@ const fetchUserLists = async () => {
     .orderBy(desc(lists.updatedAt));
 };
 
-const fetchPublicLists = async () => {
+const fetchPublicListsAction = async () => {
   return await db
     .select()
     .from(lists)
@@ -48,7 +48,7 @@ const fetchPublicLists = async () => {
     .orderBy(desc(lists.updatedAt));
 };
 
-const fetchSharedLists = async () => {
+const fetchSharedListsAction = async () => {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -437,9 +437,9 @@ const deleteListItemAction = async (
 
 export {
   fetchListDetailsAction,
-  fetchUserLists,
-  fetchPublicLists,
-  fetchSharedLists,
+  fetchUserListsAction,
+  fetchPublicListsAction,
+  fetchSharedListsAction,
   isListOwnerAction,
   saveListDetailsAction,
   updateListDetailsAction,

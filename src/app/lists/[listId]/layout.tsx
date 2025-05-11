@@ -6,9 +6,9 @@ import { auth } from "~/server/auth";
 import { NewListDialog } from "~/app/_components/list-details-form";
 import { PlusIcon } from "lucide-react";
 import {
-  fetchPublicLists,
-  fetchSharedLists,
-  fetchUserLists,
+  fetchPublicListsAction,
+  fetchSharedListsAction,
+  fetchUserListsAction,
 } from "~/server/actions";
 import { List } from "~/server/db/schema";
 
@@ -56,12 +56,12 @@ export default async function ListsLayout({
 const fetchLists = async () => {
   const session = await auth();
   if (session) {
-    const usersLists = await fetchUserLists();
+    const usersLists = await fetchUserListsAction();
     // TODO This will be replaced with lists that have been shared between users.
-    const sharedLists = await fetchSharedLists();
+    const sharedLists = await fetchSharedListsAction();
     return { myLists: usersLists, sharedLists: sharedLists };
   } else {
-    const allLists = await fetchPublicLists();
+    const allLists = await fetchPublicListsAction();
     return { myLists: null, sharedLists: allLists };
   }
 };
