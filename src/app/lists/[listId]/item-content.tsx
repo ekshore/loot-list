@@ -2,7 +2,8 @@
 
 import { CheckIcon, SquareArrowOutUpRightIcon } from "lucide-react";
 import Link from "next/link";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { EditItemForm } from "~/app/_components/list-item-form";
 import {
   Accordion,
@@ -32,35 +33,52 @@ const ItemAccordian = ({
   }[];
   isListOwner: boolean;
 }) => {
-  const items = listItems.map((item) => {
-    const [purchasedDate, setPurchasedDate] = useState(item.datePurchased);
-    const checkStyle = purchasedDate ? "" : "hidden";
-    const strikethrough = purchasedDate ? "line-through" : "";
-    return (
-      <AccordionItem value={item.id} key={item.id}>
-        <AccordionTrigger className="ml-4">
-          <div className={`flex flex-row ${strikethrough}`}>
-            <div className="w-8">
-              <CheckIcon className={checkStyle} />
-            </div>{" "}
-            {item.name}
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="ml-4">
-          <ItemContent
-            item={item}
-            isListOwner={isListOwner}
-            setPurchasedDate={setPurchasedDate}
-          />
-        </AccordionContent>
-      </AccordionItem>
-    );
-  });
+  const items = listItems.map((item) => (
+    <ItemShell item={item} isListOwner={isListOwner} key={item.id} />
+  ));
 
   return (
     <Accordion type="single" collapsible className="my-16 w-full">
       {items}
     </Accordion>
+  );
+};
+
+const ItemShell = ({
+  item,
+  isListOwner,
+}: {
+  item: {
+    listId: string;
+    id: string;
+    name: string;
+    description: string | null;
+    datePurchased: Date | null;
+    url: string | null;
+  };
+  isListOwner: boolean;
+}) => {
+  const [purchasedDate, setPurchasedDate] = useState(item.datePurchased);
+  const checkStyle = purchasedDate ? "" : "hidden";
+  const strikethrough = purchasedDate ? "line-through" : "";
+  return (
+    <AccordionItem value={item.id}>
+      <AccordionTrigger className="ml-4">
+        <div className={`flex flex-row ${strikethrough}`}>
+          <div className="w-8">
+            <CheckIcon className={checkStyle} />
+          </div>{" "}
+          {item.name}
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="ml-4">
+        <ItemContent
+          item={item}
+          isListOwner={isListOwner}
+          setPurchasedDate={setPurchasedDate}
+        />
+      </AccordionContent>
+    </AccordionItem>
   );
 };
 

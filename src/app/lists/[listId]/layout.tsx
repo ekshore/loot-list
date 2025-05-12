@@ -10,7 +10,7 @@ import {
   fetchSharedListsAction,
   fetchUserListsAction,
 } from "~/server/actions";
-import { List } from "~/server/db/schema";
+import type { List } from "~/server/db/schema";
 
 export default async function ListsLayout({
   children,

@@ -1,8 +1,9 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import type { UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
+import type { z } from "zod";
 import {
   Form,
   FormControl,
@@ -30,13 +31,15 @@ import {
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
+import type { ReactNode } from "react";
 
 type ListDetails = z.infer<typeof listDetailsSchema>;
 
 const ListDetailsForm = ({
   form,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<ListDetails, any, ListDetails>;
 }) => {
   return (
@@ -122,11 +125,11 @@ const NewListDialog = ({ children }: { children: ReactNode }) => {
         setOpen(false);
         router.push(`/lists/${res.data.id}`);
       })
-      .catch((err) => {
+      .catch((_err) => {
         toast({
           variant: "destructive",
-          title: "Oops, something went wrong",
-          description: err,
+          title: "Uh Oh, something went wrong",
+          description: "Failed to save new list",
         });
       });
   };
@@ -198,9 +201,7 @@ const ListDetailsEditForm = ({
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
               <DialogTitle>Edit List</DialogTitle>
-              <DialogDescription>
-                Make changes to this list
-              </DialogDescription>
+              <DialogDescription>Make changes to this list</DialogDescription>
               <ListDetailsForm form={form} />
               <DialogFooter className="mt-4">
                 <Button type="submit">Save</Button>

@@ -3,8 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PencilLineIcon, PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
+import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -34,6 +35,7 @@ import {
 
 type Item = z.infer<typeof itemSchema>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ItemForm = ({ form }: { form: UseFormReturn<Item, any, Item> }) => {
   return (
     <>

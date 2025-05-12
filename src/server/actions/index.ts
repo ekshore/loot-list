@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 "use server";
 import { auth } from "../auth";
-import { listDetailsSchema, itemSchema } from "~/server/validators";
+import type { listDetailsSchema, itemSchema } from "~/server/validators";
 import { lists, listItems, users } from "~/server/db/schema";
 import { db } from "~/server/db";
 import { and, desc, eq, ne, sql } from "drizzle-orm";
-import { z } from "zod";
+import type { z } from "zod";
 
 type ServerActionResult<T> =
   | { success: true; data: T }
@@ -30,7 +31,7 @@ const fetchUserListsAction = async () => {
 
   if (!session || !session.user) {
     console.log("fetchUserLists() - No user session denying request");
-    return Promise.reject("No User Session, FORBIDDEN");
+    return Promise.reject(FORBIDDEN_ERROR);
   }
 
   return await db
@@ -53,7 +54,7 @@ const fetchSharedListsAction = async () => {
 
   if (!session || !session.user) {
     console.log("fetchSharedLists() - No user session denying request");
-    return Promise.reject("No User Session, FORBIDDEN");
+    return Promise.reject(FORBIDDEN_ERROR);
   }
 
   return await db
@@ -121,7 +122,7 @@ const saveListDetailsAction = async (
   const session = await auth();
   if (!session) {
     console.log("saveListDetailsAction() - No user session denying request");
-    return Promise.reject();
+    return Promise.reject(FORBIDDEN_ERROR);
   }
 
   return await db.transaction(async (tx) => {
@@ -177,7 +178,7 @@ const saveListDetailsAction = async (
           success: false,
           error: {
             code: 500,
-            message: err,
+            message: "Insert Failed",
           },
         };
       });
@@ -193,7 +194,7 @@ const updateListDetailsAction = async (
     console.log(
       "updateListDetailsAction() - User is unauthorized denying reqeust",
     );
-    return Promise.reject();
+    return Promise.reject(UNAUTHORIZED_ERROR);
   }
 
   return await db
@@ -209,7 +210,7 @@ const updateListDetailsAction = async (
     .catch((err) => {
       console.log("updateListDetailsAction() - Error during update");
       console.log(err);
-      return { success: false, error: { code: 500, message: err } };
+      return { success: false, error: { code: 500, message: "updateFailed" } };
     });
 };
 
@@ -231,7 +232,7 @@ const deleteListAction = async (
     .catch((err) => {
       console.log("deleteListAction() - Error during delete");
       console.log(err);
-      return { success: false, error: { code: 500, message: err } };
+      return { success: false, error: { code: 500, message: "Delete Failed" } };
     });
 };
 
@@ -267,7 +268,7 @@ const saveListItemAction = async (
     .catch((err) => {
       console.log("saveListItemAction() - Error during insert");
       console.log(err);
-      return { success: false, error: { code: 500, message: err } };
+      return { success: false, error: { code: 500, message: "Insert Failed" } };
     });
 };
 
@@ -313,7 +314,7 @@ const updateListItemAction = async (
     .catch((err) => {
       console.log("updateListItemAction() - Error during update");
       console.log(err);
-      return { success: false, error: { code: 500, message: err } };
+      return { success: false, error: { code: 500, message: "Update Failed" } };
     });
 };
 
@@ -386,11 +387,13 @@ const removePurchasedDate = async (
     .where(eq(listItems.id, itemId))
     .then(() => NULL_SUCCESS)
     .catch((err) => {
+      console.log("removePurchasedDate() - Failed to remove purchased date");
+      console.log(err);
       return Promise.reject({
         success: false,
         error: {
           code: 500,
-          message: err,
+          message: "Remove Purchase Date Failed",
         },
       });
     });
@@ -410,7 +413,7 @@ const deleteListItemAction = async (
   if (
     !session ||
     !parentList ||
-    !hasListAccess(parentList.id, session.user.id)
+    !(await hasListAccess(parentList.id, session.user.id))
   ) {
     console.log(
       "deleteListItemAction() - User is unauthorized denying reqeust",
@@ -429,7 +432,7 @@ const deleteListItemAction = async (
     .catch((err) => {
       console.log("deleteListItemAction() - Error during delete");
       console.log(err);
-      return { success: false, error: { code: 500, message: err } };
+      return { success: false, error: { code: 500, message: "Delete Failed" } };
     });
 
   return NULL_SUCCESS;
