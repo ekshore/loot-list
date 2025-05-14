@@ -28,7 +28,7 @@ const UserAvatar = async () => {
       {session ? (
         <Avatar>
           <AvatarImage src={session.user.image!} alt={session.user.name!} />
-          <AvatarFallback>{session.user.name!}</AvatarFallback>
+          <AvatarFallback>{getInitals(session.user.name!)}</AvatarFallback>
         </Avatar>
       ) : (
         <Button variant="ghost">
@@ -37,6 +37,11 @@ const UserAvatar = async () => {
       )}
     </Link>
   );
+};
+
+const getInitals = (name: string) => {
+  const splitName = name.split(" ");
+  return `${splitName[0]?.substring(0,1)?.toUpperCase()}${splitName[1] ? splitName[1].substring(0,1).toUpperCase() : ""}`;
 };
 
 export { Header };
